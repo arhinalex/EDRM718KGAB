@@ -3,7 +3,10 @@ title: "Project Revisions Log"
 output: html_notebook
 ---
 
-### March 2, 2023
+Include revision notes here as you add or update files, folders to the repository. Please try to include the changes under the appropriate date and initial the entry. ~ BL
+
+
+## March 2, 2023
 
 Initial Assignments decided. Added data set, project directions, and revision log to the new project.
 
@@ -25,10 +28,11 @@ Initial Assignments decided. Added data set, project directions, and revision lo
 - Write a conclusions section
 - Assemble a complete knittable report (team leader)
 
+~ BL
 
 
-
-
+## March 3, 2023
+Updated README file to include project description. ~ BL
 
 
 

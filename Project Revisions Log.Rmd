@@ -8,7 +8,7 @@ Include revision notes here as you add or update files, folders to the repositor
 
 ## March 2, 2023
 
-Initial Assignments decided. Added data set, project directions, and revision log to the new project.
+Initial Assignments decided.
 
 #### Ben
 - Create a public GitHub repository with an RStudio project file (team leader)
@@ -34,8 +34,7 @@ Initial Assignments decided. Added data set, project directions, and revision lo
 ## March 3, 2023
 Updated README file to include project description. ~ BL
 
-
-
+Added data set, project directions, and revision log to the new project. Also added subfolders for Data, Functions, and Project Components. ~ BL
 
 
 

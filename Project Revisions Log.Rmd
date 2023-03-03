@@ -1,0 +1,37 @@
+---
+title: "Project Revisions Log"
+output: html_notebook
+---
+
+### March 2, 2023
+
+Initial Assignments decided. Added data set, project directions, and revision log to the new project.
+
+#### Ben
+- Create a public GitHub repository with an RStudio project file (team leader)
+- Put a description of the project in the README.md file (team leader)
+- Email team members and Mike the repository address (team leader)
+
+#### Alex
+- Write a short introduction
+- Provide a graphical display and descriptive statistics to compare groups
+#### Giovanna
+- Conduct an analysis of variance (ANOVA) for omnibus inference
+- Check the conditions necessary for valid ANOVA inference
+#### Mardo
+- Conduct a bootstrap for omnibus inference without needing conditions
+- Construct Tukey pairwise confidence intervals (if appropriate)
+#### Ben
+- Write a conclusions section
+- Assemble a complete knittable report (team leader)
+
+
+
+
+
+
+
+
+
+
+

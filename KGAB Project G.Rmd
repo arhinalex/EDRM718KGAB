@@ -1,0 +1,180 @@
+---
+title: "Project G: Collaborating on Projects"
+author: "Kemardo Tyrell, Giovanna Morara, Benjamin Leslie, and Alex Arhin"
+date: March 14, 2023
+output: html_notebook
+---
+
+*This project will require you to collaborate with some of your fellow students to complete a statistical analysis and report. Here are some of the tasks that you must accomplish.*
+
+- Create a public GitHub repository with an RStudio project file (team leader)
+- Put a description of the project in the README.md file (team leader)
+- Email team members and Mike the repository address (team leader)
+- Write a short introduction
+- Provide a graphical display and descriptive statistics to compare groups
+- Conduct an analysis of variance (ANOVA) for omnibus inference
+- Check the conditions necessary for valid ANOVA inference
+- Conduct a bootstrap for omnibus inference without needing conditions
+- Construct Tukey pairwise confidence intervals (if appropriate)
+- Write a conclusions section
+- Assemble a complete knittable report (team leader)
+
+*If you write any functions, put these in a **Functions** folder. Put data in a **Data** folder. These should be subfolders in your main project folder. Your finished notebook should be neat and organized. Save this notebook with your team name and **Project G** in the file name, rather than the report title. Leave the instructions in place and begin your report after the last horizontal line below. All team members will receive the same score for this project. (40 points possible)*
+
+***
+
+The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
+
+***
+
+
+## Introduction
+
+
+
+## Analysis of Variance
+
+
+```{r}
+# Clear the environment
+rm(list = ls())
+
+# Load the libraries
+library(here)
+
+# Load data
+data <- read.csv(here("Data", "hsb2.csv"))
+```
+
+# Describing Data
+
+```{r}
+# ses ordinal  (1=low 2=middle 3=high)  
+data$ses <- factor(data$ses,
+                   labels = c("Low",
+                              "Middle",
+                              "High"))
+
+# Obtain boxplots.
+
+boxplot(data$science ~ data$ses,
+        ylim = c(0, 100),
+        xlab = "Socioeconomic Status",
+        ylab = "Science Scores",
+        main = "Scores depending on SES")
+
+```
+
+## Obtain descriptive statistics.
+
+```{r}
+tapply(data$science, data$ses, summary)
+tapply(data$science, data$ses, sd)
+```
+
+
+# Check the conditions necessary for valid ANOVA inference
+
+### Groups are independent (research design)
+
+This study is observational so individuals are classified to one SES.
+
+### Units within groups are independent to each other (research design)
+
+The students are randomly selected. It could still be possible that near
+relatives are from one family (therefore non independent).
+
+### Now let's check the conditions for inference (statistic)
+
+```{r}
+model <- lm(data$science ~ data$ses)
+std_residual <- rstandard(model)
+qqnorm(std_residual)
+qqline(std_residual)
+```
+
+The sampling distribution is normally distributed, although there is 
+a deviation for higher levels. However, for each group we have more
+than 30 participants and the deviations is not harsh. Therefore, the 
+condition is met.
+
+```{r}
+table(data$ses)
+```
+
+### Residual withint groups have the same variation
+
+Looking at the variance of residuals within the categories. 
+
+```{r}
+plot(model$fitted.values, model$residuals,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Plot of Residuals vs. Fit")
+
+abline(0,0)
+```
+
+There is some skewness in the in the High SES. But the spread around the 
+means homogeneous for the most cases.
+
+### Sampling distribution of means are normal distributions
+
+We do not have a skewed distribution, we also have more than 30
+participant for each group so for the Central Limit Theorem, so we have
+a normal sampling distribution. 
+
+---------------------------------------------------------------------------
+
+# Conduct an analysis of variance (ANOVA) for omnibus inference
+
+We will use function aov to get the analysis of variance
+
+```{r}
+aov.model <- aov(data$science ~ data$ses)
+aov.model
+summary(aov.model)
+```
+Choosing a 95% certanty level, we can reject the null hypothesis: there is
+some difference between one or more of the groups.
+
+# Anlalysis of pairs of mean.
+
+This section is to construct confidence intervals for each pair of 
+conditions to understand the differences between the groups.
+
+```{r}
+## Checking dummies variables
+# model <- lm(data$science ~ data$ses)
+# summary(model)
+# anova(model)
+```
+
+
+```{r}
+t.test(science ~ ses,
+           data = data,
+           subset = (ses == "Low" | ses == "Middle"))
+
+t.test(science ~ ses,
+           data = data,
+           subset = (ses == "Middle" | ses == "High"))
+
+t.test(science ~ ses,
+           data = data,
+           subset = (ses == "Low" | ses == "High"))
+```
+
+There seems to be differences for each pair of means. Specifically, science
+scores for high ses students are higher then both middle and low ses. At 
+the same time, middle ses students have higher science score than low ses
+students. 
+
+
+## Inference and Confidence Interval
+
+
+
+## Conclusions
+
+

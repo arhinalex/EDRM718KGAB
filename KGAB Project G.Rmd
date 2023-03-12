@@ -26,28 +26,30 @@ output: html_notebook
 The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
 
 ***
-
-
-## Introduction
-
-
-
-## Analysis of Variance
-
-
-
-
-#### Describing Data
 ```{r}
 # Clear the environment
 rm(list = ls())
 
 # Load the libraries
 library(here)
+library(dplyr)
 
 # Load data
 data <- read.csv(here("Data", "hsb2.csv"))
+the_data <- read.csv(here("Data", "hsb2.csv"))
 ```
+
+
+## Introduction
+
+
+
+***
+
+## Analysis of Variance
+
+#### Describing Data
+
 
 ```{r}
 # ses ordinal  (1=low 2=middle 3=high)  
@@ -139,7 +141,7 @@ summary(aov.model)
 Choosing a 95% certanty level, we can reject the null hypothesis: there is
 some difference between one or more of the groups.
 
-#### Anlalysis of pairs of mean.
+#### Analysis of pairs of mean.
 
 This section is to construct confidence intervals for each pair of 
 conditions to understand the differences between the groups.
@@ -171,10 +173,61 @@ ttest3
 
 There seems to be differences for each pair of means. Specifically, science scores for high ses students are higher then both middle and low ses. The 95% confidence interval for the mean difference was found to be `r round(ttest2$conf.int[1],2)` < $mu$ < `r round(ttest2$conf.int[2],2)` when compared to middle SES students and `r round(ttest3$conf.int[1],2)` < $mu$ < `r round(ttest3$conf.int[2],2)` when compared to low SES students. At the same time, middle ses students have higher science score than low ses students. The 95% confidence interval for the mean difference was found to be `r round(ttest1$conf.int[1],2)` < $mu$ < `r round(ttest1$conf.int[2],2)
 
+***
 
 ## Inference and Confidence Interval
+```{r echo=FALSE}
+ # Initialize objects
+ mean_vector <- NULL
+ n <- length(the_data$science)
+```
+
+```{r echo=FALSE}
+ # Take multiple samples (with replacement) and construct sampling distribution 
+ # of the mean
+ 
+ # Setting a seed for reproducibility
+ set.seed(123)
+
+ for (i in 1:10000) {
+   the_sample <- sample(the_data$science, n, replace = TRUE)
+   mean_vector <- c(mean_vector, mean(the_sample))
+ }
+
+ # Sort the vector and cut off 2.5% on each end
+ mean_vector <- sort(mean_vector) 
+ 
+ # Using the quantile function so that the bounds are not
+ # dependent on the number of bootstrap samples generated
+ boot_int <- quantile(mean_vector, c(0.025, 0.975))
+ boot_int
+   
+```
+
+The code above uses bootstrapping to construct a sampling distribution of the mean of the "science" column in the data frame or list "the_data". The code generates 10,000 bootstrap samples of size "n" with replacement from the "science" column and computes the mean of each sample. The resulting means are stored in the "mean_vector" variable, which contains the distribution of the means of the bootstrap samples. The "mean_vector" is then sorted in ascending order and the lower and upper bounds of the 95% bootstrap confidence interval are extracted using the quantile() function. This way, the bounds are not dependent on the number of bootstrap samples generated. The resulting confidence interval was found to be `r round(boot_int[1],2)` < $mu$ < `r round(boot_int[2],2)`
+
+```{r echo=FALSE}
+# Check for equal sample sizes
+low <- subset(the_data, the_data$ses == 1)
+count(low)
+middle <- subset(the_data, the_data$ses == 2)
+count(middle)
+high <- subset(the_data, the_data$ses == 3)
+count(high)
+
+# Check for equal variance
+low <- low[,10]
+sd(low)
+middle <- middle[,10]
+sd(middle)
+high <- high[,10]
+sd(high)
+```
 
 
+There is no need to construct pairwise key confidence intervals since this is typically used in the context of comparing multiple groups, often through one-way ANOVA or a similar analysis of variance method. Since this report is dealing with a single column of data (science), it does not make sense to construct such intervals since there is only one group to compare. Instead, when dealing with a single column of data, it may not make sense to construct Tukey pairwise confidence intervals since there is only one group to compare. Instead, one can use bootstrapping or other re-sampling methods to estimate the uncertainty around the mean or other summary statistic of the data, and to construct confidence intervals for that statistic. Hence, bootstrapping was done earlier.
+
+***
 
 ## Conclusions
 An analysis of variance was conducted to compare HSB2 science performances for three socioeconomic groups. The data set was found to satisfy the criteria for conducting a valid ANOVA as the groups were independent, the units within groups were independent, the data is normally distributed, and the distribution is not skewed. Using the ANOVA, we can say with a 95% level of confidence that there is not a statistically significant difference between two or more of the groups. T tests were then used to compare the mean science scores for each SES level. These tests found high SES students obtained higher scores than middle or low SES students. The results also found that middle SES students obtained higher scores than low SES students.

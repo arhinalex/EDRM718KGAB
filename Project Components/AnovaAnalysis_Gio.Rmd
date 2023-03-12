@@ -107,7 +107,7 @@ summary(aov.model)
 Choosing a 95% certanty level, we can reject the null hypothesis: there is
 some difference between one or more of the groups.
 
-# Anlalysis of pairs of mean.
+# Analysis of pairs of mean.
 
 This section is to construct confidence intervals for each pair of 
 conditions to understand the differences between the groups.

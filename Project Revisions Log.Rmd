@@ -36,5 +36,9 @@ Updated README file to include project description. ~ BL
 
 Added data set, project directions, and revision log to the new project. Also added subfolders for Data, Functions, and Project Components. ~ BL
 
+## March 12, 2023
+GM completed analysis of variance and it was merged into the repo. ~ BL
 
+## March 12, 2023
+Added analysis of variance to final document. Began conclusion ~ BL
 

@@ -138,3 +138,19 @@ There seems to be differences for each pair of means. Specifically, science
 scores for high ses students are higher then both middle and low ses. At 
 the same time, middle ses students have higher science score than low ses
 students. 
+
+### Tukey 
+
+When there is homogeneity of variance among all conditions.
+It gives the narrowest confidence interval.
+
+```{r}
+aov.model <- aov(data$science ~ data$ses)
+Tukey_results <- TukeyHSD(aov.model)
+```
+
+We can also obtain a plot to illustrate these differences, if we'd like.
+
+```{r}
+plot(Tukey_results)
+```

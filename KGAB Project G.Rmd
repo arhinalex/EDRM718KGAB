@@ -35,6 +35,9 @@ The *HSB2 Data* includes variables collected on a random sample of high school s
 ## Analysis of Variance
 
 
+
+
+#### Describing Data
 ```{r}
 # Clear the environment
 rm(list = ls())
@@ -45,8 +48,6 @@ library(here)
 # Load data
 data <- read.csv(here("Data", "hsb2.csv"))
 ```
-
-# Describing Data
 
 ```{r}
 # ses ordinal  (1=low 2=middle 3=high)  
@@ -65,28 +66,28 @@ boxplot(data$science ~ data$ses,
 
 ```
 
-## Obtain descriptive statistics.
+#### Obtain descriptive statistics.
 
-```{r}
+```{r echo=FALSE}
 tapply(data$science, data$ses, summary)
 tapply(data$science, data$ses, sd)
 ```
 
 
-# Check the conditions necessary for valid ANOVA inference
+#### Check the conditions necessary for valid ANOVA inference
 
-### Groups are independent (research design)
+###### Groups are independent (research design)
 
 This study is observational so individuals are classified to one SES.
 
-### Units within groups are independent to each other (research design)
+###### Units within groups are independent to each other (research design)
 
 The students are randomly selected. It could still be possible that near
 relatives are from one family (therefore non independent).
 
-### Now let's check the conditions for inference (statistic)
+###### Now let's check the conditions for inference (statistic)
 
-```{r}
+```{r echo=FALSE}
 model <- lm(data$science ~ data$ses)
 std_residual <- rstandard(model)
 qqnorm(std_residual)
@@ -98,15 +99,15 @@ a deviation for higher levels. However, for each group we have more
 than 30 participants and the deviations is not harsh. Therefore, the 
 condition is met.
 
-```{r}
+```{r echo=FALSE}
 table(data$ses)
 ```
 
-### Residual withint groups have the same variation
+###### Residual withint groups have the same variation
 
 Looking at the variance of residuals within the categories. 
 
-```{r}
+```{r echo=FALSE}
 plot(model$fitted.values, model$residuals,
      xlab = "Fitted Values",
      ylab = "Residuals",
@@ -118,7 +119,7 @@ abline(0,0)
 There is some skewness in the in the High SES. But the spread around the 
 means homogeneous for the most cases.
 
-### Sampling distribution of means are normal distributions
+###### Sampling distribution of means are normal distributions
 
 We do not have a skewed distribution, we also have more than 30
 participant for each group so for the Central Limit Theorem, so we have
@@ -126,11 +127,11 @@ a normal sampling distribution.
 
 ---------------------------------------------------------------------------
 
-# Conduct an analysis of variance (ANOVA) for omnibus inference
+#### Conduct an analysis of variance (ANOVA) for omnibus inference
 
 We will use function aov to get the analysis of variance
 
-```{r}
+```{r echo=FALSE}
 aov.model <- aov(data$science ~ data$ses)
 aov.model
 summary(aov.model)
@@ -138,12 +139,12 @@ summary(aov.model)
 Choosing a 95% certanty level, we can reject the null hypothesis: there is
 some difference between one or more of the groups.
 
-# Anlalysis of pairs of mean.
+#### Anlalysis of pairs of mean.
 
 This section is to construct confidence intervals for each pair of 
 conditions to understand the differences between the groups.
 
-```{r}
+```{r echo=FALSE}
 ## Checking dummies variables
 # model <- lm(data$science ~ data$ses)
 # summary(model)
@@ -151,7 +152,7 @@ conditions to understand the differences between the groups.
 ```
 
 
-```{r}
+```{r echo=FALSE}
 ttest1 <- t.test(science ~ ses,
            data = data,
            subset = (ses == "Low" | ses == "Middle"))

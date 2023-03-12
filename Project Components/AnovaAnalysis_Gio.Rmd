@@ -56,6 +56,7 @@ relatives are from one family (therefore non independent).
 ### Now let's check the conditions for inference (statistic)
 
 ```{r}
+model <- lm(data$science ~ data$ses)
 std_residual <- rstandard(model)
 qqnorm(std_residual)
 qqline(std_residual)

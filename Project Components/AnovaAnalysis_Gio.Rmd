@@ -154,3 +154,40 @@ We can also obtain a plot to illustrate these differences, if we'd like.
 ```{r}
 plot(Tukey_results)
 ```
+
+## Bootstrap
+
+```{r}
+# Loop
+
+sesLow <- data[which(data$ses == "Low"),] 
+sesMiddle <- data[which(data$ses == "Middle"),]
+sesHigh <-  data[which(data$ses == "High"),]
+nLow <- length(sesLow)
+nMiddle <- length(sesMiddle)
+nHigh <- length(sesHigh)
+Diff <- NULL
+
+# mean_Vector_Low <- NULL
+# mean_Vector_Middle <- NULL 
+# mean_Vector_High <- NULL
+
+ for (i in 1:10000) {
+   sampleLow <- sample(sesLow$science, nLow, replace = TRUE)
+   mean_Vector_Low <- mean(sampleLow)
+   sampleMiddle <- sample(sesMiddle$science, nLow, replace = TRUE)
+   mean_Vector_Middle <- mean(sampleMiddle)
+   sampleHigh <- sample(sesHigh$science, nLow, replace = TRUE)
+   mean_Vector_High <- mean(sampleHigh)
+   
+   Lower <- min(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Higher <- max(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Diff <- c(Diff, (Higher-Lower))
+ }
+
+# Sampling Distribution
+
+Diff <- sort(Diff)
+Boot_int <- c(Diff[251], Diff[9750])
+
+```

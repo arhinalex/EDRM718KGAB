@@ -171,7 +171,7 @@ ttest3 <- t.test(science ~ ses,
 ttest3
 ```
 
-There seems to be differences for each pair of means. Specifically, science scores for high ses students are higher then both middle and low ses. The 95% confidence interval for the mean difference was found to be `r round(ttest2$conf.int[1],2)` < $mu$ < `r round(ttest2$conf.int[2],2)` when compared to middle SES students and `r round(ttest3$conf.int[1],2)` < $mu$ < `r round(ttest3$conf.int[2],2)` when compared to low SES students. At the same time, middle ses students have higher science score than low ses students. The 95% confidence interval for the mean difference was found to be `r round(ttest1$conf.int[1],2)` < $mu$ < `r round(ttest1$conf.int[2],2)
+There seems to be differences for each pair of means. Specifically, science scores for high ses students are higher then both middle and low ses. The 95% confidence interval for the mean difference was found to be `r round(ttest2$conf.int[1],2)` < $mu$ < `r round(ttest2$conf.int[2],2)` when compared to middle SES students and `r round(ttest3$conf.int[1],2)` < $mu$ < `r round(ttest3$conf.int[2],2)` when compared to low SES students. At the same time, middle ses students have higher science score than low ses students. The 95% confidence interval for the mean difference was found to be `r round(ttest1$conf.int[1],2)` < $mu$ < `r round(ttest1$conf.int[2],2)`.
 
 ***
 

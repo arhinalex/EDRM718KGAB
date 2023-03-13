@@ -1,8 +1,10 @@
 ---
 title: "KGAB Project G"
 author: "Kemardo Tyrell, Giovanna Morara, Benjamin Leslie, and Alex Arhin"
-date: March 14, 2023
-output: html_notebook
+date: "March 14, 2023"
+output:
+  html_document:
+    df_print: paged
 ---
 
 *This project will require you to collaborate with some of your fellow students to complete a statistical analysis and report. Here are some of the tasks that you must accomplish.*
@@ -26,7 +28,7 @@ output: html_notebook
 The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
 
 ***
-```{r echo=FALSE}
+```{r include=FALSE}
 # Clear the environment
 rm(list = ls())
 
@@ -146,7 +148,7 @@ some difference between one or more of the groups.
 This section is to construct confidence intervals for each pair of 
 conditions to understand the differences between the groups.
 
-```{r echo=FALSE}
+```{r include=FALSE}
 ## Checking dummies variables
 # model <- lm(data$science ~ data$ses)
 # summary(model)
@@ -176,7 +178,7 @@ There seems to be differences for each pair of means. Specifically, science scor
 ***
 
 ## Inference and Confidence Interval
-```{r echo=FALSE}
+```{r include=FALSE}
  # Initialize objects
  mean_vector <- NULL
  n <- length(the_data$science)
@@ -211,7 +213,7 @@ The code above uses bootstrapping to construct a sampling distribution of the me
 When there is homogeneity of variance among all conditions.
 It gives the narrowest confidence interval.
 
-```{r}
+```{r include=FALSE}
 aov.model <- aov(data$science ~ data$ses)
 Tukey_results <- TukeyHSD(aov.model)
 ```

@@ -1,0 +1,151 @@
+---
+title: "Project G: Collaborating on Projects"
+output: html_notebook
+---
+
+*This project will require you to collaborate with some of your fellow students to complete a statistical analysis and report. Here are some of the tasks that you must accomplish.*
+
+- Create a public GitHub repository with an RStudio project file (team leader)
+- Put a description of the project in the README.md file (team leader)
+- Email team members and Mike the repository address (team leader)
+- Write a short introduction
+- Provide a graphical display and descriptive statistics to compare groups
+- Conduct an analysis of variance (ANOVA) for omnibus inference
+- Check the conditions necessary for valid ANOVA inference
+- Conduct a bootstrap for omnibus inference without needing conditions
+- Construct Tukey pairwise confidence intervals (if appropriate)
+- Write a conclusions section
+- Assemble a complete knittable report (team leader)
+
+*If you write any functions, put these in a **Functions** folder. Put data in a **Data** folder. These should be subfolders in your main project folder. Your finished notebook should be neat and organized. Save this notebook with your team name and **Project G** in the file name, rather than the report title. Leave the instructions in place and begin your report after the last horizontal line below. All team members will receive the same score for this project. (40 points possible)*
+
+***
+
+The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
+
+***
+### Introduction
+
+This collaborative project was undertaken by the KGAB Group made of team
+members of three males and 1 amazing female. The group was led by Ben. 
+Group members were tasks to analyze the science score of students according to their socioeconomic status. Each team member was assigned a task to complete in the 
+repository created by the team leader. the tasks include writing a brief introduction, providing a graphical display and descriptive statistics to compare groups,analysis of variance (ANOVA) for omnibus inference, checking the conditions necessary for valid ANOVA inference, conducting a bootstrap for omnibus inference without needing conditions, constructing Tukey  pairwise confidence intervals, writing a conclusions section, and assembling a  complete knittable report.
+
+### Graphical Display and Descriptive Statistics
+
+*Table 1: Summary of Science Score*
+
+```{r echo=FALSE}
+library(here)
+
+hsb2_data <- read.csv(here("Data", "hsb2.csv"))
+
+low_ses <- subset(hsb2_data, hsb2_data$ses == "1")
+middle_ses <- subset(hsb2_data, hsb2_data$ses == "2")
+high_ses <- subset(hsb2_data, hsb2_data$ses == "3")
+
+sci_n <- nrow(hsb2_data)
+sci_fivenum <- fivenum( hsb2_data$science)
+sci_mean <- mean(hsb2_data$science)
+sci_sd <- sd(hsb2_data$science)
+
+round( c(N = sci_n, Min = sci_fivenum[1], Q1 = sci_fivenum[2],
+         Med = sci_fivenum[3], Q3 = sci_fivenum[4], 
+         Max = sci_fivenum[5], Mean = sci_mean, SD = sci_sd), 1)
+
+```
+
+The science test in the hsb2 data has a sample of `r sci_n` with the mean of `r round((sci_mean), 1)` and a standard deviation of `r round((sci_sd), 1)`. The 
+science test has a minimum and maximum scores of `r sci_fivenum[1]` and `r sci_fivenum[5]` respectively.  
+
+*Table 2: SES Count*
+
+```{r echo=FALSE}
+ses_count <- table(hsb2_ses)
+ses_count
+```
+*Table 3: Race Count*
+```{r echo=FALSE}
+race_count <- table(hsb2_race)
+race_count
+
+```
+
+*Table 4: School Type Count*
+```{r echo=FALSE}
+schtyp_count <- table(hsb2_schtyp)
+schtyp_count
+```
+from the tables above, middle ses count had the highest count with a sample of`r ses_count[[2]]` 
+followed by high ses `r ses_count[[3]]` and low ses `r ses_count[[1]]` respectively. Whites dominated the race with a total of `r race_count[[4]]` followed by hispanic 
+`r race_count[[1]]` and african american `r race_count[[3]]` respectively. Asian 
+least represented race was asian with a sample of `r race_count[[2]]`. In terms of school type, public schools had the highest representation with a sample of `r schtyp_count[[1]]` whilst private schools had the least representation with a sample 
+of `r schtyp_count[[2]]`.
+
+*Figure 1: Proportion of SES Groups*
+
+```{r echo=FALSE}
+ses.prop <- prop.table(ses_count)
+
+barplot(ses.prop,
+        col = c( "black", "gray", "orange4"),
+        xlab = "SES", 
+        ylab = "Proportion", ylim = c(0, 0.5))
+
+```
+
+
+
+
+*Figure 2: Proportion of Science scores according to categories*
+
+```{r echo=FALSE}
+# Categorize Science Scores
+
+science_cat <- cut(hsb2_data$science, 
+                   c( 0, 40, 65, 100))
+
+levels(science_cat) <- c( "low", "average", "high")
+
+science_count <- table(science_cat)
+
+
+science_prop <- prop.table(science_count)
+
+barplot(science_prop,
+        col = c( "black", "gray", "orange4"),
+        xlab = "Science Score", 
+        ylab = "Proportion", ylim = c(0, 0.8))
+
+```
+
+*Figure 3: Percent of SES classification according to science score*
+```{r echo=FALSE}
+ses_sc_counts = table(hsb2_ses, science_cat)
+
+ses_sc_counts_percents = 100*prop.table(ses_sc_counts, 2)
+
+
+barplot(ses_sc_counts_percents,
+        col = c( "black", "gray", "orange4"),
+        xlab = "Science Score",
+        ylab = "Percents",
+        legend = c("low", "middle", "high"),
+        args.legend = list(title = "SES", cex = .7))
+
+```
+
+Figure 1 displays the proportion of SES groups that participated in the study. 
+Midlle SES group had the highest representation followed by high SES group and 
+low SES group. Figure 2 represent the proportion of science scores according to
+low, average and high categories. Scores between 0 and 40 were categorized as 
+*low scores*, between 41 and 65 were categorized as *average scores*, and scores 
+between 66 to 100 were categorized as *high scores*. Figure 3 represent the 
+proportion of SES scores according to science score. Majority of the students in 
+low and middle SES groups had low science score whilst few students in the high
+SES group had low science score. Majority of the middle SES students had average science score follow by high SES students and low SES students. High science score was
+dominated by both middle and high SES students whilst few low SES students had
+high science scores.  
+
+
+

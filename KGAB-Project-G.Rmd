@@ -44,14 +44,7 @@ the_data <- read.csv(here("Data", "hsb2.csv"))
 
 ## Introduction
 
-
-
-***
-
-## Analysis of Variance
-
-#### Describing Data
-
+The HSB2 data set contains test scores for 200 high school students in subject tests for reading, writing, mathematics, science, and social studies. This data set also provides the socioeconomic status (SES) level for each student. This study will divide the students into the three SES levels to determine if differences in the science scores exist between SES levels. 
 
 ```{r echo=FALSE}
 # ses ordinal  (1=low 2=middle 3=high)  
@@ -66,17 +59,26 @@ boxplot(data$science ~ data$ses,
         ylim = c(0, 100),
         xlab = "Socioeconomic Status",
         ylab = "Science Scores",
-        main = "Scores depending on SES")
+        main = "Figure 1. Scores depending on SES")
 
 ```
 
-#### Obtain descriptive statistics.
+Figure 1. Shows a boxplot of the score distributions on the science HSB2 test divided by socioeconomic status. This figure shows us that the high SES level has the highest mean and contains an outlier score on the lower end.
 
+#### Table 1. Five Number Summary of Science Scores by SES Level
 ```{r echo=FALSE}
-tapply(data$science, data$ses, summary)
-tapply(data$science, data$ses, sd)
+ses_summary <- tapply(data$science, data$ses, summary)
+ses_summary
+ses_sd <- tapply(data$science, data$ses, sd)
+ses_sd
 ```
 
+Table 1 shows the five number summary of science scores for each SES level. The high SES level was found to have the highest mean score at `r round(ses_summary$High[4],2)`. Middle SES had the highest maximum value at `r round(ses_summary$Middle[6],2)`. Middle SES also had the highest minimum value at `r round(ses_summary$Middle[1],2)` while the low SES level had the lowest minimum value at `r round(ses_summary$Low[1],2)`.
+
+
+***
+
+## Analysis of Variance
 
 #### Check the conditions necessary for valid ANOVA inference
 
@@ -91,18 +93,17 @@ relatives are from one family (therefore non independent).
 
 ###### Now let's check the conditions for inference (statistic)
 
+
 ```{r echo=FALSE}
 model <- lm(data$science ~ data$ses)
 std_residual <- rstandard(model)
-qqnorm(std_residual)
+qqnorm(std_residual, main = "Figure 2. Normal Q-Q Plot")
 qqline(std_residual)
 ```
 
-The sampling distribution is normally distributed, although there is 
-a deviation for higher levels. However, for each group we have more
-than 30 participants and the deviations is not harsh. Therefore, the 
-condition is met.
+The sampling distribution is normally distributed, although there is a deviation for higher levels. This can be seen in Figure 2. However, for each group we have more than 30 participants and the deviations is not harsh. Therefore, the condition is met.
 
+#### Table 2. Number of Cases by SES Level
 ```{r echo=FALSE}
 table(data$ses)
 ```
@@ -115,7 +116,7 @@ Looking at the variance of residuals within the categories.
 plot(model$fitted.values, model$residuals,
      xlab = "Fitted Values",
      ylab = "Residuals",
-     main = "Plot of Residuals vs. Fit")
+     main = "Figure 3. Plot of Residuals vs. Fit")
 
 abline(0,0)
 ```
@@ -135,6 +136,7 @@ a normal sampling distribution.
 
 We will use function aov to get the analysis of variance
 
+#### Figure 4. Analysis of Variance Summary
 ```{r echo=FALSE}
 aov.model <- aov(data$science ~ data$ses)
 aov.model
@@ -156,25 +158,6 @@ conditions to understand the differences between the groups.
 ```
 
 
-```{r echo=FALSE}
-ttest1 <- t.test(science ~ ses,
-           data = data,
-           subset = (ses == "Low" | ses == "Middle"))
-ttest1
-
-ttest2 <- t.test(science ~ ses,
-           data = data,
-           subset = (ses == "Middle" | ses == "High"))
-ttest2
-
-ttest3 <- t.test(science ~ ses,
-           data = data,
-           subset = (ses == "Low" | ses == "High"))
-ttest3
-```
-
-There seems to be differences for each pair of means. Specifically, science scores for high ses students are higher then both middle and low ses. The 95% confidence interval for the mean difference was found to be `r round(ttest2$conf.int[1],2)` < $mu$ < `r round(ttest2$conf.int[2],2)` when compared to middle SES students and `r round(ttest3$conf.int[1],2)` < $mu$ < `r round(ttest3$conf.int[2],2)` when compared to low SES students. At the same time, middle ses students have higher science score than low ses students. The 95% confidence interval for the mean difference was found to be `r round(ttest1$conf.int[1],2)` < $mu$ < `r round(ttest1$conf.int[2],2)`.
-
 ***
 
 ## Inference and Confidence Interval
@@ -185,28 +168,41 @@ There seems to be differences for each pair of means. Specifically, science scor
 ```
 
 ```{r echo=FALSE}
- # Take multiple samples (with replacement) and construct sampling distribution 
- # of the mean
- 
- # Setting a seed for reproducibility
- set.seed(123)
+# Loop
+
+sesLow <- data[which(data$ses == "Low"),] 
+sesMiddle <- data[which(data$ses == "Middle"),]
+sesHigh <-  data[which(data$ses == "High"),]
+nLow <- length(sesLow)
+nMiddle <- length(sesMiddle)
+nHigh <- length(sesHigh)
+Diff <- NULL
+
+# mean_Vector_Low <- NULL
+# mean_Vector_Middle <- NULL 
+# mean_Vector_High <- NULL
 
  for (i in 1:10000) {
-   the_sample <- sample(the_data$science, n, replace = TRUE)
-   mean_vector <- c(mean_vector, mean(the_sample))
+   sampleLow <- sample(sesLow$science, nLow, replace = TRUE)
+   mean_Vector_Low <- mean(sampleLow)
+   sampleMiddle <- sample(sesMiddle$science, nLow, replace = TRUE)
+   mean_Vector_Middle <- mean(sampleMiddle)
+   sampleHigh <- sample(sesHigh$science, nLow, replace = TRUE)
+   mean_Vector_High <- mean(sampleHigh)
+   
+   Lower <- min(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Higher <- max(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Diff <- c(Diff, (Higher-Lower))
  }
 
- # Sort the vector and cut off 2.5% on each end
- mean_vector <- sort(mean_vector) 
- 
- # Using the quantile function so that the bounds are not
- # dependent on the number of bootstrap samples generated
- boot_int <- quantile(mean_vector, c(0.025, 0.975))
- boot_int
-   
+# Sampling Distribution
+
+Diff <- sort(Diff)
+Boot_int <- c(Diff[251], Diff[9750])
+
 ```
 
-The code above uses bootstrapping to construct a sampling distribution of the mean of the "science" column in the data frame or list "the_data". The code generates 10,000 bootstrap samples of size "n" with replacement from the "science" column and computes the mean of each sample. The resulting means are stored in the "mean_vector" variable, which contains the distribution of the means of the bootstrap samples. The "mean_vector" is then sorted in ascending order and the lower and upper bounds of the 95% bootstrap confidence interval are extracted using the quantile() function. This way, the bounds are not dependent on the number of bootstrap samples generated. The resulting confidence interval was found to be `r round(boot_int[1],2)` < $mu$ < `r round(boot_int[2],2)`
+The code above uses bootstrapping to construct a sampling distribution of the mean of the "science" column in the data frame or list "the_data". The code generates 10,000 bootstrap samples of size "n" with replacement from the "science" column and computes the mean of each sample. The resulting means are stored in the "mean_vector" variable, which contains the distribution of the means of the bootstrap samples. The "mean_vector" is then sorted in ascending order and the lower and upper bounds of the 95% bootstrap confidence interval are extracted using the quantile() function. This way, the bounds are not dependent on the number of bootstrap samples generated. The resulting confidence interval was found to be `r round(Boot_int[1],2)` < $mu$ < `r round(Boot_int[2],2)`
 
 ### Tukey 
 
@@ -220,15 +216,16 @@ Tukey_results <- TukeyHSD(aov.model)
 
 We can also obtain a plot to illustrate these differences, if we'd like.
 
-```{r}
+#### Figure 5. Family-Wise Confidence Level by SES Levels
+```{r echo=FALSE}
 plot(Tukey_results)
 ```
 ***
 
 ## Conclusions
-An analysis of variance was conducted to compare HSB2 science performances for three socioeconomic groups. The data set was found to satisfy the criteria for conducting a valid ANOVA as the groups were independent, the units within groups were independent, the data is normally distributed, and the distribution is not skewed. Using the ANOVA, we can say with a 95% level of confidence that there is not a statistically significant difference between two or more of the groups. T tests were then used to compare the mean science scores for each SES level. These tests found high SES students obtained higher scores than middle or low SES students. The results also found that middle SES students obtained higher scores than low SES students. It is important to note that the 95% confidence intervals for high-middle and middle-low had upper bounds between -1 and 0. This suggests that the high-low relationship had much stronger evidence of a difference between groups.
+An analysis of variance was conducted to compare HSB2 science performances for three socioeconomic groups. The data set was found to satisfy the criteria for conducting a valid ANOVA as the groups were independent, the units within groups were independent, the data is normally distributed, and the distribution is not skewed. Using the ANOVA, we can say with a 95% level of confidence that there is not a statistically significant difference between two or more of the groups.
 
-Using bootstrapping, a 95% confidence interval for the true population mean science score was found to be `r round(boot_int[1],2)` < $mu$ < `r round(boot_int[2],2)`. A Tukey pairwise estimate was conducted and found that only the high-low relationship yielded a statistically significant p value, p > 0.05. This relationship was also the only one to yield a confidence interval that did not contain zero. This supports that the high-low SES mean score difference does not equal zero with 95 percent confidence.
+Using bootstrapping, a 95% confidence interval for the true population mean science score was found to be `r round(Boot_int[1],2)` < $mu$ < `r round(Boot_int[2],2)`. A Tukey pairwise estimate was conducted and found that only the high-low relationship yielded a statistically significant p value, p > 0.05. This relationship was also the only one to yield a confidence interval that did not contain zero. This supports that the high-low SES mean score difference does not equal zero with 95 percent confidence.
 
 In total, these findings suggest that there is mixed evidence to support a difference in science scores between socioeconomic status levels. It is worth noting that the relationship between low SES and high SES students' scores yielded the most consistent evidence to support a difference in the mean score of the two groups.
 

@@ -169,7 +169,7 @@ barplot(ses_sc_counts_percents,
 
 Figure 4 represent the proportion of SES scores according to science score. Majority of the students in low and middle SES groups had low science score whilst few students in the high SES group had low science score. Majority of the middle SES students had average science score follow by high SES students and low SES students. High science score was dominated by both middle and high SES students whilst few low SES students had high science scores.  
 
-#### Table 4. Five Number Summary of Science Scores by SES Level
+#### Table 5. Five Number Summary and Standard Deviations of Science Scores by SES Level
 ```{r echo=FALSE}
 ses_summary <- tapply(data$science, data$ses, summary)
 ses_summary
@@ -177,7 +177,7 @@ ses_sd <- tapply(data$science, data$ses, sd)
 ses_sd
 ```
 
-Table 4 shows the five number summary of science scores for each SES level. The high SES level was found to have the highest mean score at `r round(ses_summary$High[4],2)`. Middle SES had the highest maximum value at `r round(ses_summary$Middle[6],2)`. Middle SES also had the highest minimum value at `r round(ses_summary$Middle[1],2)` while the low SES level had the lowest minimum value at `r round(ses_summary$Low[1],2)`.
+Table 5 shows the five number summary of science scores for each SES level. The high SES level was found to have the highest mean score at `r round(ses_summary$High[4],2)`. Middle SES had the highest maximum value at `r round(ses_summary$Middle[6],2)`. Middle SES also had the highest minimum value at `r round(ses_summary$Middle[1],2)` while the low SES level had the lowest minimum value at `r round(ses_summary$Low[1],2)`.
 
 
 ***
@@ -198,7 +198,7 @@ qqline(std_residual)
 
 The sampling distribution is normally distributed, although there is a deviation for higher levels. This can be seen in Figure 5. However, for each group we have more than 30 participants and the deviations is not harsh. Therefore, the condition for inference is met.
 
-#### Table 5. Number of Cases by SES Level
+#### Table 6. Number of Cases by SES Level
 ```{r echo=FALSE}
 table(data$ses)
 ```
@@ -231,7 +231,7 @@ a normal sampling distribution.
 
 We will use function aov to get the analysis of variance
 
-#### Figure 7. Analysis of Variance Summary
+#### Table 7. Analysis of Variance Summary
 ```{r echo=FALSE}
 aov.model <- aov(data$science ~ data$ses)
 aov.model
@@ -269,9 +269,9 @@ Diff <- NULL
  for (i in 1:10000) {
    sampleLow <- sample(sesLow$science, nLow, replace = TRUE)
    mean_Vector_Low <- mean(sampleLow)
-   sampleMiddle <- sample(sesMiddle$science, nLow, replace = TRUE)
+   sampleMiddle <- sample(sesMiddle$science, nMiddle, replace = TRUE)
    mean_Vector_Middle <- mean(sampleMiddle)
-   sampleHigh <- sample(sesHigh$science, nLow, replace = TRUE)
+   sampleHigh <- sample(sesHigh$science, nHigh, replace = TRUE)
    mean_Vector_High <- mean(sampleHigh)
    
    Lower <- min(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
@@ -300,10 +300,18 @@ Tukey_results <- TukeyHSD(aov.model)
 
 We can also obtain a plot to illustrate these differences, if we'd like.
 
-#### Figure 5. Family-Wise Confidence Level by SES Levels
+#### Figure 7. Family-Wise Confidence Level by SES Levels
 ```{r echo=FALSE}
 plot(Tukey_results)
 ```
+
+#### Table 8. Tukey Results
+```{r echo=FALSE}
+Tukey_results
+```
+
+The Tukey analysis found that, although all p values were close to 0.05, only the high-low p value was a statistically significant difference in the mean science scores.
+
 ***
 
 ## Conclusions

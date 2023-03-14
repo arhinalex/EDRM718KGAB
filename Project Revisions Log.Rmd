@@ -45,3 +45,4 @@ Added analysis of variance to final document. Began conclusion ~ BL
 ## March 13, 2023
 Finished the conclusion, revised the bootstrapping, removed t tests, added introduction. ~ BL
 
+Added additional paragraph to introduction detailing the data set ~ BL

@@ -304,13 +304,8 @@ We can also obtain a plot to illustrate these differences, if we'd like.
 
 #### Figure 7. Family-Wise Confidence Level by SES Levels
 ```{r echo=FALSE}
-plot(Tukey_results, 
-     main = "Figure 7. Family-wise Confidence Level By SES Levels", 
-     xlab = "Difference in Mean Science Scores by SES Level",
-     ylab = "SES Levels")
-#mtext("Figure 7. Family-wise Confidence Level by SES Levels", 3, 1)
-#mtext("Difference in Mean Science Scores by SES Level", 1, 3)
-#mtext("SES Levels", 2, 2)
+names(Tukey_results) <- "SES"
+plot(Tukey_results)
 ```
 
 #### Table 8. Tukey Results

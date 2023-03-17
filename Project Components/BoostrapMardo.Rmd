@@ -1,0 +1,73 @@
+---
+title: "Project G: Collaborating on Projects"
+author: "Kemardo Tyrell"
+date: "March 11, 2023"
+output: html_notebook
+---
+```{r}
+rm(list = ls())
+
+library(here)
+library(dplyr)
+```
+
+*This project will require you to collaborate with some of your fellow students to complete a statistical analysis and report. Here are some of the tasks that you must accomplish.*
+
+- Create a public GitHub repository with an RStudio project file (team leader)
+- Put a description of the project in the README.md file (team leader)
+- Email team members and Mike the repository address (team leader)
+- Write a short introduction
+- Provide a graphical display and descriptive statistics to compare groups
+- Conduct an analysis of variance (ANOVA) for omnibus inference
+- Check the conditions necessary for valid ANOVA inference
+- Conduct a bootstrap for omnibus inference without needing conditions
+- Construct Tukey pairwise confidence intervals (if appropriate)
+- Write a conclusions section
+- Assemble a complete knittable report (team leader)
+
+*If you write any functions, put these in a **Functions** folder. Put data in a **Data** folder. These should be subfolders in your main project folder. Your finished notebook should be neat and organized. Save this notebook with your team name and **Project G** in the file name, rather than the report title. Leave the instructions in place and begin your report after the last horizontal line below. All team members will receive the same score for this project. (40 points possible)*
+
+***
+
+The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
+
+***
+
+
+```{r}
+
+the_data <- read.csv(here("Data", "hsb2.csv"))
+```
+
+
+```{r}
+ # Initialize objects
+ mean_vector <- NULL
+ n <- length(the_data$science)
+```
+
+```{r}
+ # Take multiple samples (with replacement) and construct sampling distribution 
+ # of the mean
+ 
+ # Setting a seed for reproducibility
+ set.seed(123)
+
+ for (i in 1:10000) {
+   the_sample <- sample(the_data$science, n, replace = TRUE)
+   mean_vector <- c(mean_vector, mean(the_sample))
+ }
+
+ # Sort the vector and cut off 2.5% on each end
+ mean_vector <- sort(mean_vector) 
+ 
+ # Using the quantile function so that the bounds are not
+ # dependent on the number of bootstrap samples generated
+ boot_int <- quantile(mean_vector, c(0.025, 0.975))
+ boot_int
+   
+```
+
+The code above uses bootstrapping to construct a sampling distribution of the mean of the "science" column in the data frame or list "the_data". The code generates 10,000 bootstrap samples of size "n" with replacement from the "science" column and computes the mean of each sample. The resulting means are stored in the "mean_vector" variable, which contains the distribution of the means of the bootstrap samples. The "mean_vector" is then sorted in ascending order and the lower and upper bounds of the 95% bootstrap confidence interval are extracted using the quantile() function. This way, the bounds are not dependent on the number of bootstrap samples generated. The resulting confidence interval is stored in the "boot_int" variable.
+
+There is no need to construct pairwise key confidence intervals since this is typically used in the context of comparing multiple groups, often through one-way ANOVA or a similar analysis of variance method. Since this report is dealing with a single column of data (science), it does not make sense to construct such intervals since there is only one group to compare. Instead, when dealing with a single column of data, it may not make sense to construct Tukey pairwise confidence intervals since there is only one group to compare. Instead, one can use bootstrapping or other re-sampling methods to estimate the uncertainty around the mean or other summary statistic of the data, and to construct confidence intervals for that statistic. Hence, bootstrapping was done earlier.

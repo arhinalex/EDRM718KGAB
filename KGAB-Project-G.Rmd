@@ -1,0 +1,326 @@
+---
+title: "KGAB Project G"
+author: "Kemardo Tyrell, Giovanna Morara, Benjamin Leslie, and Alex Arhin"
+date: "March 14, 2023"
+output:
+  html_document:
+    df_print: paged
+---
+
+*This project will require you to collaborate with some of your fellow students to complete a statistical analysis and report. Here are some of the tasks that you must accomplish.*
+
+- Create a public GitHub repository with an RStudio project file (team leader)
+- Put a description of the project in the README.md file (team leader)
+- Email team members and Mike the repository address (team leader)
+- Write a short introduction
+- Provide a graphical display and descriptive statistics to compare groups
+- Conduct an analysis of variance (ANOVA) for omnibus inference
+- Check the conditions necessary for valid ANOVA inference
+- Conduct a bootstrap for omnibus inference without needing conditions
+- Construct Tukey pairwise confidence intervals (if appropriate)
+- Write a conclusions section
+- Assemble a complete knittable report (team leader)
+
+*If you write any functions, put these in a **Functions** folder. Put data in a **Data** folder. These should be subfolders in your main project folder. Your finished notebook should be neat and organized. Save this notebook with your team name and **Project G** in the file name, rather than the report title. Leave the instructions in place and begin your report after the last horizontal line below. All team members will receive the same score for this project. (40 points possible)*
+
+***
+
+The *HSB2 Data* includes variables collected on a random sample of high school seniors. Conduct an analysis to compare performance on the test variable assigned to your team for the three socioeconomic groups. Include a graphical display and descriptive statistics. Also include an omnibus analysis that assumes valid conditions for parametric inference (ANOVA) as well as an omnibus analysis that does not assume these conditions (bootstrap). Construct pairwise Tukey confidence intervals, if appropriate.
+
+***
+```{r include=FALSE}
+# Clear the environment
+rm(list = ls())
+
+# Load the libraries
+library(here)
+library(dplyr)
+library(rmarkdown)
+library(tidyverse)
+
+# Load data
+data <- read.csv(here("Data", "hsb2.csv"))
+the_data <- read.csv(here("Data", "hsb2.csv"))
+```
+
+
+## Introduction
+
+This collaborative project was undertaken by the KGAB Group made of team
+members of three males and 1 amazing female. The group was led by Ben. 
+Group members were tasks to analyze the science score of students according to their socioeconomic status. Each team member was assigned a task to complete in the repository created by the team leader. The tasks include writing a brief introduction, providing a graphical display and descriptive statistics to compare groups,analysis of variance (ANOVA) for omnibus inference, checking the conditions necessary for valid ANOVA inference, conducting a bootstrap for omnibus inference without needing conditions, constructing Tukey  pairwise confidence intervals, writing a conclusions section, and assembling a  complete knittable report.
+
+The HSB2 data set contains test scores for 200 high school students in subject tests for reading, writing, mathematics, science, and social studies. This data set also provides the socioeconomic status (SES) level for each student. This study will divide the students into the three SES levels to determine if differences in the science scores exist between SES levels. 
+
+```{r echo=FALSE}
+# ses ordinal  (1=low 2=middle 3=high)  
+data$ses <- factor(data$ses,
+                   labels = c("Low",
+                              "Middle",
+                              "High"))
+
+# Obtain boxplots.
+
+boxplot(data$science ~ data$ses,
+        ylim = c(0, 100),
+        xlab = "Socioeconomic Status",
+        ylab = "Science Scores",
+        main = "Figure 1. Scores depending on SES")
+
+```
+
+Figure 1. Shows a boxplot of the score distributions on the science HSB2 test divided by socioeconomic status. This figure shows us that the high SES level has the highest mean and contains an outlier score on the lower end.
+
+#### Table 1: Summary of Science Score
+```{r echo=FALSE}
+
+hsb2_data <- read.csv(here("Data", "hsb2.csv"))
+
+low_ses <- subset(hsb2_data, hsb2_data$ses == "1")
+middle_ses <- subset(hsb2_data, hsb2_data$ses == "2")
+high_ses <- subset(hsb2_data, hsb2_data$ses == "3")
+
+sci_n <- nrow(hsb2_data)
+sci_fivenum <- fivenum( hsb2_data$science)
+sci_mean <- mean(hsb2_data$science)
+sci_sd <- sd(hsb2_data$science)
+
+round( c(N = sci_n, Min = sci_fivenum[1], Q1 = sci_fivenum[2],
+         Med = sci_fivenum[3], Q3 = sci_fivenum[4], 
+         Max = sci_fivenum[5], Mean = sci_mean, SD = sci_sd), 1)
+
+```
+
+The science test in the hsb2 data has a sample of `r sci_n` with the mean of `r round((sci_mean), 1)` and a standard deviation of `r round((sci_sd), 1)`. The  science test has a minimum and maximum scores of `r sci_fivenum[1]` and `r sci_fivenum[5]` respectively.  
+
+#### Table 2: SES Count
+```{r echo=FALSE}
+ses_count <- table(hsb2_data$ses)
+ses_count
+```
+
+#### Table 3: Race Count
+```{r echo=FALSE}
+race_count <- table(hsb2_data$race)
+race_count
+
+```
+
+#### Table 4: School Type Count
+```{r echo=FALSE}
+schtyp_count <- table(hsb2_data$schtyp)
+schtyp_count
+```
+
+From the tables above, middle SES count had the highest count with a sample of`r ses_count[[2]]` followed by high ses `r ses_count[[3]]` and low SES `r ses_count[[1]]`, respectively. White students dominated the race with a total of `r race_count[[4]]` followed by Hispanic `r race_count[[1]]` and African American `r race_count[[3]]` respectively. Asian was the least represented race with a sample of `r race_count[[2]]`. In terms of school type, public schools had the highest representation with a sample of `r schtyp_count[[1]]` whilst private schools had the least representation with a sample of `r schtyp_count[[2]]`.
+
+```{r echo=FALSE}
+ses.prop <- prop.table(ses_count)
+
+barplot(ses.prop,
+        col = c( "black", "gray", "orange4"),
+        main = "Figure 2. Proportion of SES Groups",
+        xlab = "SES", 
+        ylab = "Proportion", ylim = c(0, 0.5))
+
+```
+
+Figure 2 displays the proportion of SES groups that participated in the study. 
+Middle SES group had the highest representation followed by high SES group and 
+low SES group. 
+
+```{r echo=FALSE}
+science_cat <- cut(hsb2_data$science, 
+                   c( 0, 40, 65, 100))
+
+levels(science_cat) <- c( "low", "average", "high")
+
+science_count <- table(science_cat)
+
+
+science_prop <- prop.table(science_count)
+
+barplot(science_prop,
+        col = c( "black", "gray", "orange4"),
+        main = "Figure 3. Proportion of SES Groups",
+        xlab = "Science Score", 
+        ylab = "Proportion", ylim = c(0, 0.8))
+
+```
+
+Figure 3 represent the proportion of science scores according to
+low, average and high categories. Scores between 0 and 40 were categorized as 
+*low scores*, between 41 and 65 were categorized as *average scores*, and scores between 66 to 100 were categorized as *high scores*. 
+
+```{r echo=FALSE}
+ses_sc_counts = table(hsb2_data$ses, science_cat)
+
+ses_sc_counts_percents = 100*prop.table(ses_sc_counts, 2)
+
+
+barplot(ses_sc_counts_percents,
+        col = c( "black", "gray", "orange4"),
+        xlab = "Science Score",
+        main = "Figure 4. Percent of SES Classifications According to Science 
+        Score",
+        ylab = "Percents",
+        legend = c("low", "middle", "high"),
+        args.legend = list(title = "SES", cex = .7))
+
+```
+
+Figure 4 represent the proportion of SES scores according to science score. Majority of the students in low and middle SES groups had low science score whilst few students in the high SES group had low science score. Majority of the middle SES students had average science score follow by high SES students and low SES students. High science score was dominated by both middle and high SES students whilst few low SES students had high science scores.  
+
+#### Table 5. Five Number Summary and Standard Deviations of Science Scores by SES Level
+```{r echo=FALSE}
+ses_summary <- tapply(data$science, data$ses, summary)
+ses_summary
+ses_sd <- tapply(data$science, data$ses, sd)
+ses_sd
+```
+
+Table 5 shows the five number summary of science scores for each SES level. The high SES level was found to have the highest mean score at `r round(ses_summary$High[4],2)`. Middle SES had the highest maximum value at `r round(ses_summary$Middle[6],2)`. Middle SES also had the highest minimum value at `r round(ses_summary$Middle[1],2)` while the low SES level had the lowest minimum value at `r round(ses_summary$Low[1],2)`.
+
+
+***
+
+## Analysis of Variance
+
+#### Check the conditions necessary for valid ANOVA inference
+
+
+This study is observational so individuals are classified to one SES. Thus, the observations are independent. The requirement that units within groups are independent to each other is fulfilled because the students are randomly selected. It could still be possible that near relatives are from one family (therefore non independent).
+
+```{r echo=FALSE}
+model <- lm(data$science ~ data$ses)
+std_residual <- rstandard(model)
+qqnorm(std_residual, main = "Figure 5. Normal Q-Q Plot")
+qqline(std_residual)
+```
+
+The sampling distribution is normally distributed, although there is a deviation for higher levels. This can be seen in Figure 5. However, for each group we have more than 30 participants and the deviations is not harsh. Therefore, the condition for inference is met.
+
+#### Table 6. Number of Cases by SES Level
+```{r echo=FALSE}
+table(data$ses)
+```
+
+###### Residual withint groups have the same variation
+
+Looking at the variance of residuals within the categories. 
+
+```{r echo=FALSE}
+plot(model$fitted.values, model$residuals,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Figure 6. Plot of Residuals vs. Fit")
+
+abline(0,0)
+```
+
+There is some skewness in the in the High SES. But the spread around the 
+means homogeneous for the most cases.
+
+###### Sampling distribution of means are normal distributions
+
+We do not have a skewed distribution, we also have more than 30
+participant for each group so for the Central Limit Theorem, so we have
+a normal sampling distribution. 
+
+---------------------------------------------------------------------------
+
+#### Conduct an analysis of variance (ANOVA) for omnibus inference
+
+We will use function aov to get the analysis of variance
+
+#### Table 7. Analysis of Variance Summary
+```{r echo=FALSE}
+aov.model <- aov(data$science ~ data$ses)
+aov.model
+summary(aov.model)
+```
+Choosing a 95% certanty level, we can reject the null hypothesis: there is
+some difference between one or more of the groups.
+
+
+
+***
+
+## Inference and Confidence Interval
+```{r include=FALSE}
+ # Initialize objects
+ mean_vector <- NULL
+ n <- length(the_data$science)
+```
+
+```{r echo=FALSE}
+# Loop
+
+sesLow <- data[which(data$ses == "Low"),] 
+sesMiddle <- data[which(data$ses == "Middle"),]
+sesHigh <-  data[which(data$ses == "High"),]
+nLow <- length(sesLow)
+nMiddle <- length(sesMiddle)
+nHigh <- length(sesHigh)
+Diff <- NULL
+
+# mean_Vector_Low <- NULL
+# mean_Vector_Middle <- NULL 
+# mean_Vector_High <- NULL
+
+ for (i in 1:10000) {
+   sampleLow <- sample(sesLow$science, nLow, replace = TRUE)
+   mean_Vector_Low <- mean(sampleLow)
+   sampleMiddle <- sample(sesMiddle$science, nMiddle, replace = TRUE)
+   mean_Vector_Middle <- mean(sampleMiddle)
+   sampleHigh <- sample(sesHigh$science, nHigh, replace = TRUE)
+   mean_Vector_High <- mean(sampleHigh)
+   
+   Lower <- min(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Higher <- max(mean_Vector_Low,mean_Vector_Middle,mean_Vector_High)
+   Diff <- c(Diff, (Higher-Lower))
+ }
+
+# Sampling Distribution
+
+Diff <- sort(Diff)
+Boot_int <- c(Diff[251], Diff[9750])
+
+```
+
+The code above uses bootstrapping to construct a sampling distribution of the mean of the "science" column in the data frame or list "the_data". The code generates 10,000 bootstrap samples of size "n" with replacement from the "science" column and computes the mean of each sample. The resulting means are stored in the "mean_vector" variable, which contains the distribution of the means of the bootstrap samples. The "mean_vector" is then sorted in ascending order and the lower and upper bounds of the 95% bootstrap confidence interval are extracted using the quantile() function. This way, the bounds are not dependent on the number of bootstrap samples generated. The resulting confidence interval was found to be `r round(Boot_int[1],2)` < mu~max~ - mu~min~ < `r round(Boot_int[2],2)`
+
+### Tukey 
+
+When there is homogeneity of variance among all conditions.
+It gives the narrowest confidence interval.
+
+```{r include=FALSE}
+aov.model <- aov(data$science ~ data$ses)
+Tukey_results <- TukeyHSD(aov.model)
+```
+
+We can also obtain a plot to illustrate these differences, if we'd like.
+
+#### Figure 7. Family-Wise Confidence Level by SES Levels
+```{r echo=FALSE}
+names(Tukey_results) <- "SES"
+plot(Tukey_results)
+```
+
+#### Table 8. Tukey Results
+```{r echo=FALSE}
+Tukey_results
+```
+
+The Tukey analysis found that, although all p values were close to 0.05, only the high-low p value was a statistically significant difference in the mean science scores.
+
+***
+
+## Conclusions
+An analysis of variance was conducted to compare HSB2 science performances for three socioeconomic groups. The data set was found to satisfy the criteria for conducting a valid ANOVA as the groups were independent, the units within groups were independent, the data is normally distributed, and the distribution is not skewed. Using the ANOVA, we can say with a 95% level of confidence that there is not a statistically significant difference between two or more of the groups.
+
+Using bootstrapping, a 95% confidence interval for the true population mean science score was found to be `r round(Boot_int[1],2)` < $mu$ < `r round(Boot_int[2],2)`. A Tukey pairwise estimate was conducted and found that only the high-low relationship yielded a statistically significant p value, p > 0.05. This relationship was also the only one to yield a confidence interval that did not contain zero. This supports that the high-low SES mean score difference does not equal zero with 95 percent confidence.
+
+In total, these findings suggest that there is mixed evidence to support a difference in science scores between socioeconomic status levels. It is worth noting that the relationship between low SES and high SES students' scores yielded the most consistent evidence to support a difference in the mean score of the two groups.
+
